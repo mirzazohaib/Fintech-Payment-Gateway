@@ -19,6 +19,7 @@ This project implements a PSD2-compliant payment initiation flow. It simulates a
 ## 🌍 Architecture
 
 ### High-Level Design
+
 This solution bridges the gap between Cloud-Native Experience APIs and On-Premise Mainframe systems using an Event-Driven Architecture.
 
 ```mermaid
@@ -66,7 +67,7 @@ graph TD
 
     MQ -->|XML Message| IIB
     IIB -->|TCP/ISO8583| Core
-    
+
     %% Styling
     style User fill:#f9f,stroke:#333,stroke-width:2px
     style MQ fill:#ff9,stroke:#333,stroke-width:2px
