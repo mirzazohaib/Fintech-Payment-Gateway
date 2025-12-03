@@ -1,0 +1,19 @@
+# MuleSoft
+/target/
+/.tooling/
+/.project
+/.classpath
+/classes/
+
+# IBM IIB
+*.bar
+*.msgflow.generated
+
+# System
+.DS_Store
+Thumbs.db
+*.log
+
+# Docker Data (Do not commit)
+/mq/data/
+/security/keycloak-data/

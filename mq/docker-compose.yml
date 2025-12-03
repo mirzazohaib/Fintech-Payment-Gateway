@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  activemq:
+    image: rmohr/activemq
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes:
+      - ./mq/data:/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.1
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../security/keycloak-data:/opt/keycloak/data
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: audit_user
+      POSTGRES_PASSWORD: audit_password
+      POSTGRES_DB: audit_db
+    ports:
+      - "5432:5432"
