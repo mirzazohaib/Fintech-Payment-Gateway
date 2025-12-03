@@ -19,11 +19,60 @@ This project implements a PSD2-compliant payment initiation flow. It simulates a
 ## 🌍 Architecture
 
 ### High-Level Design
-
 This solution bridges the gap between Cloud-Native Experience APIs and On-Premise Mainframe systems using an Event-Driven Architecture.
 
-![High Level Architecture](docs/diagrams/architecture.png)
-_(Placeholder: Architecture Diagram - Pending completion of ticket [DOC-001])_
+```mermaid
+graph TD
+    %% Users
+    User([📱 Mobile User])
+
+    %% Layers
+    subgraph Experience_Layer [Experience Layer]
+        ExpAPI[📱 Mobile Exp API]
+    end
+
+    subgraph Process_Layer [Process Layer]
+        ProcPay[⚙️ Payment Process API]
+        Proc3DS[🛡️ 3DSv2 Logic]
+    end
+
+    subgraph System_Layer [System Layer]
+        SysMQ[🔌 MQ System API]
+        SysDB[💾 Audit DB System API]
+    end
+
+    subgraph Infrastructure [Infrastructure Docker/Azure]
+        MQ((ActiveMQ / IBM MQ))
+        Keycloak{🔑 Keycloak IAM}
+        DB[(Postgres Audit DB)]
+    end
+
+    subgraph Legacy_Layer [Legacy Layer IBM ACE]
+        IIB[⚙️ IBM ACE IIB Integration]
+        Core[🏛️ Core Banking Mock]
+    end
+
+    %% Flow
+    User -->|HTTPS/JSON| ExpAPI
+    ExpAPI -->|Validate Token| Keycloak
+    ExpAPI --> ProcPay
+
+    ProcPay -->|Check Risk| Proc3DS
+    ProcPay -->|Submit Payment| SysMQ
+    ProcPay -->|Log Event| SysDB
+
+    SysMQ -->|JMS| MQ
+    SysDB -->|SQL| DB
+
+    MQ -->|XML Message| IIB
+    IIB -->|TCP/ISO8583| Core
+    
+    %% Styling
+    style User fill:#f9f,stroke:#333,stroke-width:2px
+    style MQ fill:#ff9,stroke:#333,stroke-width:2px
+    style IIB fill:#9f9,stroke:#333,stroke-width:2px
+    style Keycloak fill:#f96,stroke:#333,stroke-width:2px
+```
 
 ---
 
