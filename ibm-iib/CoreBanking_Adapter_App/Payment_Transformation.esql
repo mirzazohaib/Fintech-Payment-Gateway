@@ -1,0 +1,27 @@
+BROKER SCHEMA com.fintech.payments
+
+CREATE COMPUTE MODULE Payment_Flow_Compute
+    CREATE FUNCTION Main() RETURNS BOOLEAN
+    BEGIN
+        -- 1. Copy Message Properties & Headers
+        SET OutputRoot.Properties = InputRoot.Properties;
+        SET OutputRoot.MQMD = InputRoot.MQMD;
+
+        -- 2. Map JSON (Input) to XML (Output)
+        -- Reference the incoming JSON data
+        DECLARE inRef REFERENCE TO InputRoot.JSON.Data;
+        
+        -- Create the Target XML Structure per API-GUIDELINES.md
+        CREATE LASTCHILD OF OutputRoot DOMAIN 'XMLNSC';
+        
+        -- Map Fields
+        SET OutputRoot.XMLNSC.PaymentRequest.MsgID = inRef.paymentId;
+        SET OutputRoot.XMLNSC.PaymentRequest.Amt = CAST(inRef.amount AS DECIMAL(10,2));
+        SET OutputRoot.XMLNSC.PaymentRequest.(XMLNSC.Attribute)Ccy = inRef.currency;
+        SET OutputRoot.XMLNSC.PaymentRequest.DbtrAcct = inRef.debtor.iban;
+        SET OutputRoot.XMLNSC.PaymentRequest.CdtrAcct = inRef.creditor.iban;
+        SET OutputRoot.XMLNSC.PaymentRequest.RmtInf = inRef.remittanceInfo;
+        
+        RETURN TRUE;
+    END;
+END MODULE;
