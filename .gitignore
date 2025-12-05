@@ -17,3 +17,5 @@ Thumbs.db
 # Docker Data (Do not commit)
 /mq/data/
 /security/keycloak-data/
+.env
+tests/postman/Local_Dev.postman_environment.json

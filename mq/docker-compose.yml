@@ -12,8 +12,8 @@ services:
     image: quay.io/keycloak/keycloak:22.0.1
     command: start-dev
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
     ports:
       - "8080:8080"
     volumes:
@@ -22,8 +22,8 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_USER: audit_user
-      POSTGRES_PASSWORD: audit_password
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: audit_db
     ports:
-      - "5435:5432"
+      - "5435:5432" # Mapped to 5435 to avoid local conflicts
