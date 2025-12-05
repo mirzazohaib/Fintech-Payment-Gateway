@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+
+    <flow name="publish-message-flow">
+		<http:listener doc:name="POST /mq/messages" config-ref="HTTP_Listener_config" path="/mq/messages" allowedMethods="POST"/>
+		<logger level="INFO" doc:name="Log" message="Publishing to MQ: #[payload]"/>
+		<jms:publish doc:name="Publish to PAYMENT.REQUEST" config-ref="JMS_Config" destination="PAYMENT.REQUEST">
+			<jms:message >
+				<jms:body ><![CDATA[#[output application/json --- payload]]]></jms:body>
+			</jms:message>
+		</jms:publish>
+		<set-payload value='#[output application/json --- {"status": "Message Queued"}]' doc:name="Response"/>
+	</flow>
+
+    <flow name="listen-message-flow">
+		<jms:listener doc:name="On New Message" config-ref="JMS_Config" destination="PAYMENT.REQUEST">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Log" message="[MQ CONSUMER] Received: #[payload]"/>
+	</flow>
+</mule>

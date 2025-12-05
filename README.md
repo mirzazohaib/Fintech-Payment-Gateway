@@ -69,10 +69,10 @@ graph TD
     IIB -->|TCP/ISO8583| Core
 
     %% Styling
-    style User fill:#f9f,stroke:#333,stroke-width:2px
-    style MQ fill:#ff9,stroke:#333,stroke-width:2px
-    style IIB fill:#9f9,stroke:#333,stroke-width:2px
-    style Keycloak fill:#f96,stroke:#333,stroke-width:2px
+    style User fill:#f9f,stroke:#333,stroke-width:2px,color:black
+    style MQ fill:#ff9,stroke:#333,stroke-width:2px,color:black
+    style IIB fill:#9f9,stroke:#333,stroke-width:2px,color:black
+    style Keycloak fill:#f96,stroke:#333,stroke-width:2px,color:black
 ```
 
 ---
@@ -127,3 +127,18 @@ This project follows a strict **Hybrid Agile** methodology managed via JIRA, sep
 - **Epics:** Structured by Architectural Layer (System, Process, Experience).
 
 ![JIRA Backlog](docs/diagrams/jira-backlog.png)
+
+---
+
+## 📸 Implementation Evidence (Sprint 2)
+
+### 1. MQ System API (JMS Integration)
+
+**Goal:** Establish asynchronous connectivity between the Integration Layer and the Message Broker.
+**Proof:** The composite screenshot below demonstrates:
+
+1.  **Mule Flow:** The System API publishing a JSON payload to the `payment.request` queue.
+2.  **Client Request:** Postman successfully submitting a payment (`200 OK`).
+3.  **Consumption:** The Mule JMS Listener asynchronously picking up the message from ActiveMQ logs.
+
+![MQ System API Proof](docs/diagrams/evidence-sys-mq.png)
