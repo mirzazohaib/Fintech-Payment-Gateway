@@ -153,3 +153,15 @@ This project follows a strict **Hybrid Agile** methodology managed via JIRA, sep
 3.  **Verification:** The SQL query confirms the data is committed to the `audit_logs` table.
 
 ![Audit DB System API Proof](docs/diagrams/evidence-sys-audit.png)
+
+### 3. Legacy Layer (IBM ACE)
+
+**Goal:** Orchestrate Core Banking connectivity using standard ESQL transformation logic.
+**Proof:** The screenshot below shows the **IBM App Connect Enterprise (ACE)** toolkit with the `Payment_Flow` implementation.
+
+1.  **Message Flow:** Reads from `PAYMENT.REQUEST`, processes via Compute Node, and writes to `CORE.BANKING.IN`.
+2.  **ESQL Logic:** Validates the Schema `com.fintech.payments` matches the project structure.
+
+![IBM ACE Flow](docs/diagrams/evidence-iib-flow.png)
+
+---

@@ -8,10 +8,9 @@ CREATE COMPUTE MODULE Payment_Flow_Compute
         SET OutputRoot.MQMD = InputRoot.MQMD;
 
         -- 2. Map JSON (Input) to XML (Output)
-        -- Reference the incoming JSON data
         DECLARE inRef REFERENCE TO InputRoot.JSON.Data;
         
-        -- Create the Target XML Structure per API-GUIDELINES.md
+        -- Create the Target XML Structure
         CREATE LASTCHILD OF OutputRoot DOMAIN 'XMLNSC';
         
         -- Map Fields
