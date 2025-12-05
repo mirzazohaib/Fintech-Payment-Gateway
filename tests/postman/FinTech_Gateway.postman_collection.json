@@ -1,0 +1,54 @@
+{
+  "info": {
+    "name": "FinTech_Gateway",
+    "description": "PSD2 Payment Gateway APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "3. System Layer",
+      "item": [
+        {
+          "name": "[SYS-001] Send Payment to MQ",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"paymentId\": \"PAY-1001\",\n    \"amount\": 150.00,\n    \"currency\": \"EUR\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://{{mule_host}}:{{mq_port}}/mq/messages",
+              "protocol": "http",
+              "host": ["{{mule_host}}"],
+              "port": "{{mq_port}}",
+              "path": ["mq", "messages"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[SYS-002] Log Audit Event",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"event\": \"PAYMENT_INITIATED\",\n    \"status\": \"SUCCESS\",\n    \"details\": \"Sent to MQ\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://{{mule_host}}:{{audit_port}}/audit/events",
+              "protocol": "http",
+              "host": ["{{mule_host}}"],
+              "port": "{{audit_port}}",
+              "path": ["audit", "events"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
