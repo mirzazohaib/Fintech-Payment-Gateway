@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   activemq:
     image: rmohr/activemq
@@ -26,4 +26,4 @@ services:
       POSTGRES_PASSWORD: audit_password
       POSTGRES_DB: audit_db
     ports:
-      - "5432:5432"
+      - "5435:5432"

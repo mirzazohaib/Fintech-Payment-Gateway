@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+
+	<flow name="create-audit-log">
+		<http:listener doc:name="POST /audit/events" config-ref="HTTP_Listener_config" path="/audit/events" allowedMethods="POST"/>
+		
+		<logger level="INFO" doc:name="Log Input" message="Inserting Audit Log: #[payload]" />
+
+		<db:insert doc:name="Insert Log" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO audit_logs (event_type, status, details) VALUES (:type, :status, :details)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+    "type": payload.event,
+    "status": payload.status,
+    "details": payload.details
+}]]]></db:input-parameters>
+		</db:insert>
+		
+		<set-payload value='#[output application/json --- {"status": "Logged", "id": "AUDIT-" ++ randomInt(1000) }]' doc:name="Response"/>
+	</flow>
+</mule>

@@ -142,3 +142,14 @@ This project follows a strict **Hybrid Agile** methodology managed via JIRA, sep
 3.  **Consumption:** The Mule JMS Listener asynchronously picking up the message from ActiveMQ logs.
 
 ![MQ System API Proof](docs/diagrams/evidence-sys-mq.png)
+
+### 2. Audit DB System API (PostgreSQL Persistence)
+
+**Goal:** Persist transaction logs to a secured Audit Database for compliance.
+**Proof:** The composite screenshot below demonstrates:
+
+1.  **Mule Flow:** The System API accepting a JSON log event.
+2.  **Persistence:** The **Database Connector** successfully inserting the record into the Postgres container (port 5435).
+3.  **Verification:** The SQL query confirms the data is committed to the `audit_logs` table.
+
+![Audit DB System API Proof](docs/diagrams/evidence-sys-audit.png)
