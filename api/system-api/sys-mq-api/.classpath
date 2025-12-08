@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="MULE_LIB/com.mycompany/common-security/1.0.0-SNAPSHOT"/>
 	<classpathentry kind="con" path="org.mule.tooling.MULE_PROJECT_LIB"/>
 	<classpathentry kind="con" path="MULE_LIB/org.mule.connectors/mule-jms-connector/1.9.1"/>
 	<classpathentry kind="con" path="MULE_LIB/org.mule.connectors/mule-sockets-connector/1.2.7"/>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+
+	<sub-flow name="validate-jwt-token">
+        <validation:is-not-null doc:name="Check Auth Header" value="#[attributes.headers.authorization]" message="401 Unauthorized: Missing Token"/>
+		
+        <validation:is-true doc:name="Check Bearer" expression="#[attributes.headers.authorization startsWith 'Bearer ']" message="401 Unauthorized: Invalid Token Format"/>
+        
+        <logger level="INFO" doc:name="Log User" message="Request Authorized for Token: #[attributes.headers.authorization[7 to 15]]..."/>
+	</sub-flow>
+</mule>

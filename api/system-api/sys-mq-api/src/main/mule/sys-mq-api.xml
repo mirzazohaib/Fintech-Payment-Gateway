@@ -6,9 +6,14 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
 
+    <import doc:name="Import Security" file="security.xml"/>
+
     <flow name="publish-message-flow">
 		<http:listener doc:name="POST /mq/messages" config-ref="HTTP_Listener_config" path="/mq/messages" allowedMethods="POST"/>
-		<logger level="INFO" doc:name="Log" message="Publishing to MQ: #[payload]"/>
+		
+        <flow-ref doc:name="Enforce Auth" name="validate-jwt-token"/>
+
+        <logger level="INFO" doc:name="Log" message="Publishing to MQ: #[payload]"/>
 		<jms:publish doc:name="Publish to PAYMENT.REQUEST" config-ref="JMS_Config" destination="PAYMENT.REQUEST">
 			<jms:message >
 				<jms:body ><![CDATA[#[output application/json --- payload]]]></jms:body>

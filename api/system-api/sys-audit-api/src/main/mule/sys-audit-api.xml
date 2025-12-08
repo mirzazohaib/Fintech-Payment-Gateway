@@ -6,9 +6,13 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 
+    <import doc:name="Import Security" file="security.xml"/>
+
 	<flow name="create-audit-log">
 		<http:listener doc:name="POST /audit/events" config-ref="HTTP_Listener_config" path="/audit/events" allowedMethods="POST"/>
 		
+        <flow-ref doc:name="Enforce Auth" name="validate-jwt-token"/>
+
 		<logger level="INFO" doc:name="Log Input" message="Inserting Audit Log: #[payload]" />
 
 		<db:insert doc:name="Insert Log" config-ref="Database_Config">
