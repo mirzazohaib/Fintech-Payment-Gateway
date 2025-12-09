@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <import doc:name="Import Security" file="security.xml"/>
+
+	<flow name="process-payment-flow">
+		<http:listener doc:name="POST /payment" config-ref="HTTP_Listener_config" path="/payment" allowedMethods="POST"/>
+		
+        <flow-ref doc:name="Enforce Auth" name="validate-jwt-token"/>
+        
+        <set-variable value="#[payload]" doc:name="Save Payment" variableName="originalPayment"/>
+        <set-variable value="#[attributes.headers.authorization]" doc:name="Save Auth Token" variableName="authToken"/>
+
+		<http:request method="POST" doc:name="Log: Initiated" config-ref="Audit_Request_Config" path="/audit/events">
+			<http:body ><![CDATA[#[{
+    "event": "PAYMENT_RECEIVED",
+    "status": "INITIATED",
+    "details": "Processing payment: " ++ vars.originalPayment.paymentId
+}]]]></http:body>
+			<http:headers ><![CDATA[#[{"Authorization": vars.authToken}]]]></http:headers>
+		</http:request>
+
+		<http:request method="POST" doc:name="Call MQ API" config-ref="MQ_Request_Config" path="/mq/messages">
+			<http:body ><![CDATA[#[vars.originalPayment]]]></http:body>
+			<http:headers ><![CDATA[#[{"Authorization": vars.authToken}]]]></http:headers>
+		</http:request>
+
+		<http:request method="POST" doc:name="Log: Completed" config-ref="Audit_Request_Config" path="/audit/events">
+			<http:body ><![CDATA[#[{
+    "event": "PAYMENT_PROCESSED",
+    "status": "SUCCESS",
+    "details": "Payment sent to MQ for " ++ vars.originalPayment.paymentId
+}]]]></http:body>
+			<http:headers ><![CDATA[#[{"Authorization": vars.authToken}]]]></http:headers>
+		</http:request>
+
+		<ee:transform doc:name="Final JSON" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "status": "Payment Accepted",
+    "transactionId": vars.originalPayment.paymentId,
+    "message": "Your payment is being processed."
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
