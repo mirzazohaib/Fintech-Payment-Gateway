@@ -56,3 +56,19 @@ This document serves as the "Proof of Work" for the FinTech Payment Gateway. It 
     - `sys-mq-api`: Listener consumes the message.
 
 ![Orchestration Evidence](evidence-orchestration.png)
+
+---
+
+### 5. Experience Layer (Mobile API)
+
+**Goal:** Provide a simplified, mobile-friendly interface (REST/JSON) that hides the backend complexity.
+**Proof:** The composite screenshot below demonstrates the complete 4-layer architecture in action.
+
+1.  **Request:** Mobile App sends a simple payload (Amount + Currency).
+2.  **Enrichment:** Experience API generates a Transaction ID (`MOB-xxxx`).
+3.  **Propagation:** The ID travels down to Process, Audit, and MQ layers.
+4.  **Response:** Client receives an immediate `201 Created` while backend processing continues asynchronously.
+
+![Experience Layer Evidence](evidence-experience.png)
+
+---

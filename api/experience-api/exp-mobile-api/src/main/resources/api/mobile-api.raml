@@ -1,0 +1,59 @@
+#%RAML 1.0
+title: Mobile Experience API
+version: v1
+baseUri: http://localhost:8084/api
+mediaType: application/json
+
+types:
+  PaymentRequest:
+    type: object
+    properties:
+      amount:
+        type: number
+        format: double
+        required: true
+        example: 99.99
+      currency:
+        type: string
+        minLength: 3
+        maxLength: 3
+        required: true
+        example: "EUR"
+      description:
+        type: string
+        required: false
+        example: "Dinner with friends"
+
+  PaymentResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        example: "Accepted"
+      transactionId:
+        type: string
+        example: "TX-12345"
+      message:
+        type: string
+        example: "Payment is being processed."
+
+/pay:
+  post:
+    displayName: Initiate Payment
+    description: Mobile app endpoint to start a payment
+    body:
+      application/json:
+        type: PaymentRequest
+    responses:
+      201:
+        body:
+          application/json:
+            type: PaymentResponse
+      400:
+        body:
+          application/json:
+            example: {"error": "Invalid Data"}
+      500:
+        body:
+          application/json:
+            example: {"error": "Server Error"}
