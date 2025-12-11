@@ -1,29 +1,52 @@
 version: "3.8"
-services:
-  activemq:
-    image: rmohr/activemq
-    ports:
-      - "61616:61616"
-      - "8161:8161"
-    volumes:
-      - ./mq/data:/data
 
+services:
+  # 1. ActiveMQ (Messaging)
+  activemq:
+    image: rmohr/activemq:latest
+    container_name: fintech-activemq
+    ports:
+      - "61616:61616" # JMS Port
+      - "8161:8161" # Web Console
+    environment:
+      - ACTIVEMQ_ADMIN_LOGIN=${AMQ_USER}
+      - ACTIVEMQ_ADMIN_PASSWORD=${AMQ_PASSWORD}
+    networks:
+      - fintech-net
+
+  # 2. PostgreSQL (Audit DB)
+  postgres:
+    image: postgres:13
+    container_name: fintech-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=audit_db
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - fintech-net
+
+  # 3. Keycloak (Identity)
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0.1
+    image: quay.io/keycloak/keycloak:latest
+    container_name: fintech-keycloak
     command: start-dev
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_USER}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
+      - KEYCLOAK_ADMIN=${KEYCLOAK_USER}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
+      - KC_DB=dev-file
+      - KC_HTTP_RELATIVE_PATH=/
     ports:
       - "8080:8080"
     volumes:
-      - ../security/keycloak-data:/opt/keycloak/data
+      - ../security/keycloak-data:/opt/keycloak/data/h2
+    networks:
+      - fintech-net
 
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: audit_db
-    ports:
-      - "5435:5432" # Mapped to 5435 to avoid local conflicts
+# Define the network globally
+networks:
+  fintech-net:
+    driver: bridge

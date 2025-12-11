@@ -1,21 +1,27 @@
-# MuleSoft
-/target/
-/.tooling/
-/.project
-/.classpath
-/classes/
+# --- MuleSoft & Maven (Recursive) ---
+target/
+.tooling/
+.project
+.classpath
+.settings/
+classes/
+.mule/
 
-# IBM IIB
+# --- IBM ACE ---
 *.bar
 *.msgflow.generated
 
-# System
+# --- System & logs ---
 .DS_Store
 Thumbs.db
 *.log
 
-# Docker Data (Do not commit)
-/mq/data/
-/security/keycloak-data/
+# --- Docker Runtime Data (Preserve folder structure, ignore contents) ---
+mq/data/
+mq/mq/
+security/keycloak-data/
+
+# --- Secrets & Environment Configs ---
 .env
+monitoring/.env
 tests/postman/Local_Dev.postman_environment.json

@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  # 1. THE COLLECTOR
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fintech-prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    # Security Note: Prometheus does not have built-in auth by default.
+    # In Prod, we would remove this "ports" section so it is NOT accessible
+    # from the host, only internally by Grafana.
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-net
+
+  # 2. THE DASHBOARD
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fintech-grafana
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env # Loads the secrets securely
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring-net
+
+networks:
+  monitoring-net:
+    driver: bridge
