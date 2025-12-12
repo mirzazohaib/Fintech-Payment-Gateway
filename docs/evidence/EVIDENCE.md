@@ -72,3 +72,14 @@ This document serves as the "Proof of Work" for the FinTech Payment Gateway. It 
 ![Experience Layer Evidence](evidence-experience.png)
 
 ---
+
+### 6. Quality Assurance (Automated Testing)
+
+**Goal:** Verify that the Payment Orchestration logic (validation, routing, and error handling) remains stable without requiring external dependencies (Docker/DB) to be online.
+**Proof:** The screenshot below shows the **MUnit Test Suite** execution in Anypoint Studio.
+
+1.  **Mocking:** The test framework simulates the `sys-audit-api` and `sys-mq-api` responses (removing the need for active containers).
+2.  **Validation:** The test injects a "Happy Path" payload (Payment > 30 EUR) and a valid Auth Header.
+3.  **Result:** The Green Bar confirms 100% coverage of the main flow, verifying the logic is correct.
+
+![MUnit Test Evidence](evidence-qa-munit.png)

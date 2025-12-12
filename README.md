@@ -122,9 +122,13 @@ docker-compose -f mq/docker-compose.yml up -d
 
 ## 🧪 Testing Strategy
 
-- **Unit:** MUnit (Mule), ESQLUnit (IBM).
-- **Integration:** Postman Collections (in \`/tests/postman\`).
-- **Load:** k6 scripts (in \`/scripts/load-testing\`).
+We employ a "Shift-Left" testing approach to ensure quality before deployment.
+
+| Type            | Tool    | Location                     | Status                                       |
+| :-------------- | :------ | :--------------------------- | :------------------------------------------- |
+| **Unit**        | MUnit   | `process-api/src/test/munit` | ✅ [See Evidence](docs/evidence/EVIDENCE.md) |
+| **Integration** | Postman | `tests/postman`              | 🟡 In Progress                               |
+| **Load**        | k6      | `scripts/load-testing`       | 🔜 Next Task                                 |
 
 ---
 
