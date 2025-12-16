@@ -15,7 +15,7 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 	</http:listener-config>
 
 	<db:config name="Database_Config" doc:name="Database Config">
-		<db:generic-connection url="jdbc:postgresql://localhost:5435/audit_db" driverClassName="org.postgresql.Driver" user="audit_user" password="audit_password" />
+		<db:generic-connection url="jdbc:postgresql://localhost:5435/audit_db" driverClassName="org.postgresql.Driver" user="${DB_USER}" password="${DB_PASSWORD}" />
 	</db:config>
 
 </mule>

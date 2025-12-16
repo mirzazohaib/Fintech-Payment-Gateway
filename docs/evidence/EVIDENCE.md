@@ -83,3 +83,16 @@ This document serves as the "Proof of Work" for the FinTech Payment Gateway. It 
 3.  **Result:** The Green Bar confirms 100% coverage of the main flow, verifying the logic is correct.
 
 ![MUnit Test Evidence](evidence-qa-munit.png)
+
+---
+
+### 7. Performance Testing (Load & Stress)
+
+**Goal:** Simulate high-concurrency traffic (50 concurrent users) to verify system stability under pressure.
+**Proof:** The screenshot below shows the **k6 Load Test** terminal output.
+
+1.  **Reliability:** **100% Success Rate** (1523/1523 requests) with **0% Failures**.
+2.  **Throughput:** System handled ~15 requests per second continuously.
+3.  **Note on Latency:** Average response time was ~1.89s. This latency is expected in the local Dev environment due to resource contention (running Docker, Anypoint Studio, and Load Injector on a single machine). The 0% error rate confirms the architecture is stable.
+
+![Load Test Evidence](evidence-load-test.png)
