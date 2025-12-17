@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mycompany</groupId>
+    <artifactId>fintech-payment-gateway-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>FinTech Payment Gateway Parent</name>
+    <description>Aggregator POM for the PSD2 Payment Gateway</description>
+
+    <modules>
+        <module>api/common/common-security</module>
+
+        <module>api/system-api/sys-mq-api</module>
+        <module>api/system-api/sys-audit-api</module>
+
+        <module>api/process-api/proc-payment-api</module>
+
+        <module>api/experience-api/exp-mobile-api</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.mule.tools.maven</groupId>
+                <artifactId>mule-maven-plugin</artifactId>
+                <version>4.1.1</version>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <layout>default</layout>
+            <url>https://repository.mulesoft.org/releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
