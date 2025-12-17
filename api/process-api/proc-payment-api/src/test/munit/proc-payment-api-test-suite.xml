@@ -13,6 +13,15 @@
 
 	<munit:test name="process-payment-flow-success-test" description="Test happy path payment processing">
 		<munit:behavior>
+            <munit-tools:mock-when doc:name="Mock Metrics Script" processor="scripting:execute">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Increment Request Counter" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[payload]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+
 			<munit-tools:mock-when doc:name="Mock Auth Validation" processor="flow-ref">
 				<munit-tools:with-attributes>
 					<munit-tools:with-attribute whereValue="Enforce Auth" attributeName="doc:name" />
