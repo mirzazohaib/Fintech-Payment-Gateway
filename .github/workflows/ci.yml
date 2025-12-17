@@ -1,0 +1,47 @@
+name: CI Pipeline
+
+# Trigger the pipeline on push or pull request to main/develop
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 2. Set up Java 8 (Required for Mule 4)
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: "8"
+          distribution: "temurin"
+          cache: "maven"
+
+      # 3. Configure Maven settings (Optional but recommended for MuleSoft repos)
+      # If you have a settings.xml with repo credentials, you would set it here.
+      # For now, we assume public repos or standard MuleSoft repository connectivity.
+
+      # 4. Build and Test
+      # -B: Batch mode (no logs for download progress)
+      # -V: Show version info
+      # The default goal 'package' runs MUnit tests automatically
+      - name: Build with Maven
+        run: mvn clean package -B -V
+
+      # 5. (Optional) Publish Test Report
+      # Useful if you want to see MUnit results in GitHub UI
+      - name: Upload MUnit Reports
+        if: always() # Run even if tests fail
+        uses: actions/upload-artifact@v3
+        with:
+          name: munit-test-reports
+          path: |
+            **/target/site/munit/coverage/
+            **/target/surefire-reports/

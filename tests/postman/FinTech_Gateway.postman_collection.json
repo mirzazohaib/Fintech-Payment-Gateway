@@ -6,6 +6,84 @@
   },
   "item": [
     {
+      "name": "1. Experience Layer",
+      "item": [
+        {
+          "name": "[EXP-001] Initiate Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 50.00,\n    \"currency\": \"EUR\",\n    \"description\": \"Groceries\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{mule_host}}:8084/api/pay",
+              "protocol": "http",
+              "host": ["{{mule_host}}"],
+              "port": "8084",
+              "path": ["api", "pay"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Process Layer",
+      "item": [
+        {
+          "name": "[PROC-001] Orchestrate Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"paymentId\": \"PAY-ORCH-TEST-001\",\n    \"amount\": 999.00,\n    \"currency\": \"USD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{mule_host}}:8083/payment",
+              "protocol": "http",
+              "host": ["{{mule_host}}"],
+              "port": "8083",
+              "path": ["payment"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "3. System Layer",
       "item": [
         {
@@ -16,7 +94,11 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"paymentId\": \"PAY-1001\",\n    \"amount\": 150.00,\n    \"currency\": \"EUR\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "http://{{mule_host}}:{{mq_port}}/mq/messages",
@@ -36,7 +118,11 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"event\": \"PAYMENT_INITIATED\",\n    \"status\": \"SUCCESS\",\n    \"details\": \"Sent to MQ\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "http://{{mule_host}}:{{audit_port}}/audit/events",
@@ -90,9 +176,21 @@
                   "value": "{{client_secret}}",
                   "type": "text"
                 },
-                { "key": "grant_type", "value": "password", "type": "text" },
-                { "key": "username", "value": "john.doe", "type": "text" },
-                { "key": "password", "value": "password123", "type": "text" }
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "john.doe",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                }
               ]
             },
             "url": {
