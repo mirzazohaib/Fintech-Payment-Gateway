@@ -16,7 +16,7 @@ classes/
 Thumbs.db
 *.log
 
-# --- Docker Runtime Data (Preserve folder structure, ignore contents) ---
+# --- Docker Runtime Data ---
 mq/data/
 mq/mq/
 security/keycloak-data/
@@ -25,3 +25,4 @@ security/keycloak-data/
 .env
 monitoring/.env
 tests/postman/Local_Dev.postman_environment.json
+local.yaml

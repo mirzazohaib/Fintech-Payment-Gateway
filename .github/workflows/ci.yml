@@ -1,5 +1,6 @@
 name: CI Pipeline
 
+# Trigger on push/PR to main, develop, or any feature branch
 on:
   push:
     branches: [main, develop, "feature/**"]
@@ -10,12 +11,37 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Service Containers: Create a temporary infrastructure for testing
+    services:
+      # 1. Postgres Service (Audit DB)
+      postgres:
+        image: postgres:13
+        env:
+          # CI-specific credentials. These do NOT need to match your local .env.
+          # They only need to match the Maven command arguments below.
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: audit_db
+        ports:
+          - 5435:5432 # Maps container port 5432 to runner port 5435
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # 2. ActiveMQ Service (Messaging)
+      activemq:
+        image: symptoma/activemq:latest
+        ports:
+          - 61616:61616
+
     steps:
-      # UPDATED: Uses v4 (Node 20 safe)
+      # Step 1: Check out the repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # UPDATED: Uses v4
+      # Step 2: Set up Java 8 (Required for Mule 4)
       - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
@@ -23,10 +49,22 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
+      # Step 3: Build and Test
+      # We use 'install' so sub-modules can find the common-security library.
+      # We pass -D arguments to fill the ${placeholders} in your global.xml files.
       - name: Build with Maven
-        run: mvn clean package -B -V
+        run: >
+          mvn clean install -B -V 
+          -Ddb.host=localhost 
+          -Ddb.port=5435 
+          -Ddb.name=audit_db 
+          -Ddb.user=ci_user 
+          -Ddb.password=ci_password 
+          -Dmq.host=localhost 
+          -Dmq.username=admin 
+          -Dmq.password=admin
 
-      # UPDATED: Uses v4 (Fixes the deprecation error)
+      # Step 4: Publish Test Reports (Runs even if build fails)
       - name: Upload MUnit Reports
         if: always()
         uses: actions/upload-artifact@v4

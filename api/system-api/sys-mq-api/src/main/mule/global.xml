@@ -9,13 +9,15 @@
 	http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
 	http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 
+    <configuration-properties file="${env}.yaml" />
+
     <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 
     <jms:config name="JMS_Config" doc:name="JMS Config">
-		<jms:active-mq-connection username="admin" password="admin">
-			<jms:factory-configuration brokerUrl="tcp://localhost:61616" />
+		<jms:active-mq-connection username="${mq.username}" password="${mq.password}">
+			<jms:factory-configuration brokerUrl="tcp://${mq.host}:61616" />
 		</jms:active-mq-connection>
 	</jms:config>
 
