@@ -6,8 +6,13 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
-  # We will enable these in the next step, once Mule is configured
-  # - job_name: 'mule-apis'
-  #   metrics_path: '/api/metrics'
-  #   static_configs:
-  #     - targets: ['host.docker.internal:8081', 'host.docker.internal:8082']
+  - job_name: "mule-apis"
+    metrics_path: "/metrics" # Matches the path in your XML
+    scrape_interval: 5s # Fast polling for demo purposes
+    static_configs:
+      # We list all 4 unique metrics ports here
+      - targets:
+          - "host.docker.internal:8091" # sys-mq-api
+          - "host.docker.internal:8092" # sys-audit-api
+          - "host.docker.internal:8093" # proc-payment-api
+          - "host.docker.internal:8094" # exp-mobile-api

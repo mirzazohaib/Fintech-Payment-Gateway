@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
 
     <import doc:name="Import Security" file="security.xml"/>
 
@@ -29,5 +30,34 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			</jms:consumer-type>
 		</jms:listener>
 		<logger level="INFO" doc:name="Log" message="[MQ CONSUMER] Received: #[payload]"/>
+	</flow>
+	
+	<flow name="get-metrics-flow">
+	    <http:listener doc:name="GET /metrics" 
+	                   config-ref="Metrics_Listener_Config" 
+	                   path="/metrics"
+	                   allowedMethods="GET"/>
+	
+	    <scripting:execute engine="groovy" doc:name="Scrape Prometheus Metrics">
+	        <scripting:code><![CDATA[
+	            import io.micrometer.prometheus.PrometheusConfig;
+	            import io.micrometer.prometheus.PrometheusMeterRegistry;
+	
+	            // Define a static holder to keep the registry alive across requests
+	            class MetricsSingleton {
+	                static final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+	                static {
+	                    // Optional: Add a test counter so you can see data immediately
+	                    registry.counter("mule.app.status", "app_name", "sys-mq-api").increment();
+	                }
+	            }
+	
+	            // Return the metrics in Prometheus text format
+	            return MetricsSingleton.registry.scrape();
+	        ]]></scripting:code>
+	    </scripting:execute>
+	    
+	    <set-payload value="#[payload]" mimeType="text/plain" doc:name="Set to text/plain"/>
+	    
 	</flow>
 </mule>

@@ -18,4 +18,8 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 		<db:generic-connection url="jdbc:postgresql://localhost:5435/audit_db" driverClassName="org.postgresql.Driver" user="${DB_USER}" password="${DB_PASSWORD}" />
 	</db:config>
 
+	<http:listener-config name="Metrics_Listener_Config" doc:name="Metrics Listener Config">
+	    <http:listener-connection host="0.0.0.0" port="8092" />
+	</http:listener-config>
+
 </mule>

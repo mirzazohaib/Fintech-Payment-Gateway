@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" 
+	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
@@ -17,5 +18,9 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 	<http:request-config name="Audit_Request_Config" doc:name="Audit Request Config">
 		<http:request-connection host="localhost" port="8082" />
 	</http:request-config>
+
+	<http:listener-config name="Metrics_Listener_Config" doc:name="Metrics Listener Config">
+	    <http:listener-connection host="0.0.0.0" port="8093" />
+	</http:listener-config>
 
 </mule>

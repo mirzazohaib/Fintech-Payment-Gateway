@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 
@@ -26,4 +28,28 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		
 		<set-payload value='#[output application/json --- {"status": "Logged", "id": "AUDIT-" ++ randomInt(1000) }]' doc:name="Response"/>
 	</flow>
+	
+	<flow name="get-metrics-flow">
+	    <http:listener doc:name="GET /metrics" config-ref="Metrics_Listener_Config" path="/metrics" allowedMethods="GET"/>
+	    
+	    <scripting:execute engine="groovy" doc:name="Scrape Prometheus Metrics">
+	        <scripting:code><![CDATA[
+	            import io.micrometer.prometheus.PrometheusConfig;
+	            import io.micrometer.prometheus.PrometheusMeterRegistry;
+	
+	            class MetricsSingleton {
+	                static final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+	                static {
+	                    // Unique app label
+	                    registry.counter("mule_app_status", "app", "sys-audit-api").increment();
+	                }
+	            }
+	            return MetricsSingleton.registry.scrape();
+	        ]]></scripting:code>
+	    </scripting:execute>
+	    
+	    <set-payload value="#[payload]" mimeType="text/plain" doc:name="Set to text/plain"/>
+	    
+	</flow>
+
 </mule>

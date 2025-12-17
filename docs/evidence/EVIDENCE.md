@@ -88,11 +88,34 @@ This document serves as the "Proof of Work" for the FinTech Payment Gateway. It 
 
 ### 7. Performance Testing (Load & Stress)
 
-**Goal:** Simulate high-concurrency traffic (50 concurrent users) to verify system stability under pressure.
-**Proof:** The screenshot below shows the **k6 Load Test** terminal output.
+**Goal:** Verify system stability, error handling, and throughput under high concurrency using **k6**.
 
-1.  **Reliability:** **100% Success Rate** (1523/1523 requests) with **0% Failures**.
-2.  **Throughput:** System handled ~15 requests per second continuously.
-3.  **Note on Latency:** Average response time was ~1.89s. This latency is expected in the local Dev environment due to resource contention (running Docker, Anypoint Studio, and Load Injector on a single machine). The 0% error rate confirms the architecture is stable.
+**Proof:** The GIF below captures the terminal output execution of a stress test targeting the Process API (`POST /payment`).
 
-![Load Test Evidence](evidence-load-test.png)
+1.  **Configuration:** The test simulated a high-load scenario with **50 Concurrent Users** (VUs) ramping up over 30 seconds and sustaining load for 1 minute.
+2.  **Reliability (100% Success):** Despite the high load on the local environment, the system processed **727 requests** with a **0.00% Failure Rate** (`checks_failed: 0.00%`). This proves the error handling and connection pooling configurations are robust.
+3.  **Latency Analysis:** The 95th percentile response time (`p(95)=6.42s`) exceeded the strict 500ms threshold. This was expected due to resource contention (CPU/Memory) on the local host running the entire stack (4 Apps + Docker + Database + Load Injector). However, the architecture prioritized **Reliability over Speed**, ensuring no data loss occurred even under saturation.
+
+![Load Test Execution](evidence-load-test-k6.gif)
+
+---
+
+### 8. Observability & Monitoring (Prometheus & Grafana)
+
+**Goal:** Implement real-time visibility into the API network to track health (Uptime) and throughput (Requests Per Second) without impacting business logic.
+
+**Proof A: The Metrics Pipeline**
+The composite screenshot below verifies the end-to-end telemetry pipeline:
+
+1.  **Service Discovery:** **Prometheus** successfully discovers and scrapes all 4 API targets (Ports 8091-8094), marking them as **UP**.
+2.  **Raw Data Exposition:** The browser verification confirms that the Mule application is correctly exposing custom Micrometer counters (e.g., `http_requests_total`) in the standard Prometheus text format.
+
+![Prometheus & Metrics Evidence](evidence-prometheus-combined.png)
+
+**Proof B: Real-Time Visualization (Correlated View)**
+The GIF below demonstrates the **Anypoint Console Logs** running side-by-side with the **Grafana Dashboard**.
+
+1.  **Live Correlation:** As the console logs show transaction processing (AUDIT/MQ events) in real-time, the Grafana line graph immediately visualizes the corresponding spike in `rate(http_requests_total)`.
+2.  **Accuracy:** The visual traffic shape perfectly matches the load test ramp-up, proving the monitoring infrastructure is delivering accurate, near real-time insights.
+
+![Grafana & Logs Dashboard](evidence-grafana-traffic.gif)

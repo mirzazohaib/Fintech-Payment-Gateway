@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 
@@ -10,6 +12,17 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 
 	<flow name="process-payment-flow">
 		<http:listener doc:name="POST /payment" config-ref="HTTP_Listener_config" path="/payment" allowedMethods="POST"/>
+		
+		<scripting:execute engine="groovy" doc:name="Increment Request Counter" target="metricsTemp">
+	        <scripting:code><![CDATA[
+	            import io.micrometer.core.instrument.Metrics;
+	            
+	            // Increment the counter in the GLOBAL registry
+	            Metrics.counter("http_requests_total", "method", "POST", "endpoint", "/payment").increment();
+	            
+	            return "done";
+	        ]]></scripting:code>
+	    </scripting:execute>
 		
         <flow-ref doc:name="Enforce Auth" name="validate-jwt-token"/>
         
@@ -52,4 +65,35 @@ output application/json
 			</ee:message>
 		</ee:transform>
 	</flow>
+	
+	<flow name="get-metrics-flow">
+	    <http:listener doc:name="GET /metrics" config-ref="Metrics_Listener_Config" path="/metrics" allowedMethods="GET"/>
+	    
+	    <scripting:execute engine="groovy" doc:name="Scrape Prometheus Metrics">
+	        <scripting:code><![CDATA[
+	            import io.micrometer.prometheus.PrometheusConfig;
+	            import io.micrometer.prometheus.PrometheusMeterRegistry;
+	            import io.micrometer.core.instrument.Metrics;
+	
+	            // 1. Check if we already registered the Prometheus bridge
+	            def registry = Metrics.globalRegistry.getRegistries().find { it instanceof PrometheusMeterRegistry }
+	
+	            // 2. If not, create it and register it ONCE
+	            if (registry == null) {
+	                registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+	                Metrics.globalRegistry.add(registry)
+	                
+	                // Add the static app status tag
+	                Metrics.counter("mule_app_status", "app", "proc-payment-api").increment()
+	            }
+	
+	            // 3. Scrape the specific Prometheus registry
+	            return registry.scrape();
+	        ]]></scripting:code>
+	    </scripting:execute>
+	    
+	    <set-payload value="#[payload]" mimeType="text/plain" doc:name="Set to text/plain"/>
+	    
+	</flow>
+
 </mule>
