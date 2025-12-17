@@ -1,35 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" 
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
-	
+
 	<munit:config name="proc-payment-api-test-suite.xml" />
-	
-	<munit:test name="proc-payment-api-happy-path-test" description="Test valid payment routing with mocks">
+
+	<munit:test name="process-payment-flow-success-test" description="Test happy path payment processing">
 		<munit:behavior>
-			<munit-tools:mock-when doc:name="Mock All HTTP Requests" processor="http:request">
+			<munit-tools:mock-when doc:name="Mock Auth Validation" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Enforce Auth" attributeName="doc:name" />
+				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value='#[{"status": "mock-success"}]' mediaType="application/json" />
-					<munit-tools:attributes value="#[{statusCode: 200}]" />
+					<munit-tools:payload value="#[payload]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+
+			<munit-tools:mock-when doc:name="Mock Audit Init" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Log: Initiated" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{'status': 'logged'}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+
+			<munit-tools:mock-when doc:name="Mock MQ Call" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Call MQ API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{'status': 'queued'}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+
+			<munit-tools:mock-when doc:name="Mock Audit Complete" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Log: Completed" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{'status': 'logged'}]" />
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 		</munit:behavior>
-		
+
 		<munit:execution>
-			<munit:set-event doc:name="Set API Input" >
-				<munit:payload value='#[{ "paymentId": "PAY-12345", "amount": 100.00, "currency": "EUR", "debtorAccount": "FI893792" }]' mediaType="application/java" />
-				<munit:attributes value="#[{headers: {'authorization': 'Bearer mock-token-123'}}]" />
+			<munit:set-event doc:name="Set Payment Payload">
+				<munit:payload value='{
+					"paymentId": "12345",
+					"amount": 100.00,
+					"currency": "EUR"
+				}' mediaType="application/json" />
+				<munit:attributes value="#[{headers: {'Authorization': 'Bearer test-token'}}]" />
 			</munit:set-event>
 			
-			<flow-ref doc:name="Call process-payment-flow" name="process-payment-flow"/>
+			<flow-ref doc:name="Flow-ref to process-payment-flow" name="process-payment-flow"/>
 		</munit:execution>
-		
+
 		<munit:validation>
-			<munit-tools:assert-that doc:name="Assert Payment Accepted" expression="#[payload.status]" is="#[MunitTools::equalTo('Payment Accepted')]"/>
+			<munit-tools:assert-that doc:name="Assert Status Accepted" expression="#[payload.status]" is="#[MunitTools::equalTo('Payment Accepted')]" />
+			<munit-tools:verify-call doc:name="Verify MQ Called" processor="http:request" times="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Call MQ API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
 		</munit:validation>
 	</munit:test>
 

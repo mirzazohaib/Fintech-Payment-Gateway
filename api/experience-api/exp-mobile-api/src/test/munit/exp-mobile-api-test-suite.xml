@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" 
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+
+	<munit:config name="exp-mobile-api-test-suite.xml" />
+
+	<munit:test name="mobile-app-initiation-success-test" description="Test mobile payment initiation">
+		
+		<munit:behavior>
+            <munit-tools:mock-when doc:name="Mock Auth Validation" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Enforce Auth" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[payload]" />
+                    <munit-tools:variables>
+                        <munit-tools:variable key="authToken" value="Bearer test-token"/>
+                    </munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+
+			<munit-tools:mock-when doc:name="Mock Process API" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Call Process API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='{
+						"status": "Payment Accepted",
+						"transactionId": "12345",
+						"message": "Your payment is being processed."
+					}' mediaType="application/json" />
+					<munit-tools:attributes value="#[{statusCode: 201}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+
+		<munit:execution>
+			<munit:set-event doc:name="Set Payment Payload">
+				<munit:payload value='{
+					"amount": 50.00,
+					"currency": "USD",
+					"description": "Test Payment"
+				}' mediaType="application/json" />
+                <munit:attributes value="#[{headers: {'authorization': 'Bearer test-token'}}]" />
+			</munit:set-event>
+			
+			<flow-ref doc:name="Flow-ref to post:\pay" name="post:\pay:application\json:mobile-api-config"/>
+		</munit:execution>
+
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert JSON Response" expression="#[payload.status]" is="#[MunitTools::equalTo('Accepted')]" />
+		</munit:validation>
+		
+	</munit:test>
+</mule>
