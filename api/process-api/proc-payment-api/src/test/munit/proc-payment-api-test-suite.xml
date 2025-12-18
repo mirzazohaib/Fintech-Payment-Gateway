@@ -4,20 +4,18 @@
 	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-    xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
 	xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
-		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
-        http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
 
 	<munit:config name="proc-payment-api-test-suite.xml" />
 
 	<munit:test name="process-payment-flow-success-test" description="Test happy path payment processing">
 		<munit:behavior>
-            <munit-tools:mock-when doc:name="Mock Metrics Script" processor="scripting:execute">
+            <munit-tools:mock-when doc:name="Mock Metrics Subflow" processor="flow-ref">
 				<munit-tools:with-attributes>
-					<munit-tools:with-attribute whereValue="Increment Request Counter" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Record Payment Metric" attributeName="doc:name" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
 					<munit-tools:payload value="#[payload]" />
