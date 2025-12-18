@@ -122,13 +122,28 @@ docker-compose -f mq/docker-compose.yml up -d
 
 ## 🧪 Testing Strategy
 
-We employ a "Shift-Left" testing approach to ensure quality before deployment.
+We employ a "Shift-Left" testing approach to ensure quality before deployment. All tests are now automated via the CI pipeline.
 
-| Type            | Tool    | Location                     | Status                                       |
-| :-------------- | :------ | :--------------------------- | :------------------------------------------- |
-| **Unit**        | MUnit   | `process-api/src/test/munit` | ✅ [See Evidence](docs/evidence/EVIDENCE.md) |
-| **Integration** | Postman | `tests/postman`              | 🟡 In Progress                               |
-| **Load**        | k6      | `scripts/load-testing`       | 🔜 Next Task                                 |
+| Type                  | Tool           | Location                   | Status                                                                                                    |
+| :-------------------- | :------------- | :------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| **Unit & Functional** | MUnit          | `*/src/test/munit`         | ✅ **Completed** ([See Evidence](docs/evidence/EVIDENCE.md#6-quality-assurance-automated-testing-qa-002)) |
+| **Integration**       | Postman        | `tests/postman`            | ✅ **Completed** (Collection Available)                                                                   |
+| **Load & Stress**     | k6             | `scripts/load-testing`     | ✅ **Completed** ([See Evidence](docs/evidence/EVIDENCE.md#7-performance-testing-load--stress))           |
+| **CI Automation**     | GitHub Actions | `.github/workflows/ci.yml` | ✅ **Live** (Runs on Push)                                                                                |
+
+---
+
+## 🔜 Future Roadmap
+
+The following initiatives are planned for the **v1.2.0** release cycle:
+
+| ID             | Initiative                     | Description                                                                                                                          |
+| :------------- | :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **[OPS-003]**  | **Continuous Deployment (CD)** | Automate the deployment of artifacts to a runtime (CloudHub/Runtime Fabric) immediately after a successful build.                    |
+| **[QA-004]**   | **Tech Debt Cleanup**          | Refactor `exp-mobile-api` and `proc-payment-api` to enable full MUnit execution by further isolating the Micrometer/Scripting logic. |
+| **[ARCH-001]** | **API Façade Pattern**         | Refactor the Experience Layer to be channel-agnostic (Web vs Mobile).                                                                |
+| **[OPS-004]**  | **Blue/Green Deployment**      | Implement zero-downtime updates using Docker Compose profiles.                                                                       |
+| **[DEMO-001]** | **Automated Demo**             | Create a shell script to spin up the stack and run a full end-to-end transaction automatically.                                      |
 
 ---
 

@@ -119,3 +119,16 @@ The GIF below demonstrates the **Anypoint Console Logs** running side-by-side wi
 2.  **Accuracy:** The visual traffic shape perfectly matches the load test ramp-up, proving the monitoring infrastructure is delivering accurate, near real-time insights.
 
 ![Grafana & Logs Dashboard](evidence-grafana-traffic.gif)
+
+---
+
+### 9. CI/CD Pipeline (GitHub Actions) [DEVOPS-001]
+
+**Goal:** Automate the build and test lifecycle to ensure no broken code reaches the `main` branch.
+**Proof:** The screenshot below shows the successful execution of the `.github/workflows/ci.yml` pipeline.
+
+1.  **Infrastructure Setup:** Pipeline automatically boots ephemeral Postgres and ActiveMQ containers.
+2.  **Build & Test:** Maven compiles all APIs and executes MUnit tests against the ephemeral infrastructure.
+3.  **Status:** **Green (Success)** execution in 7m 39s.
+
+![CI Pipeline Success](evidence-ci-pipeline-green.png)
