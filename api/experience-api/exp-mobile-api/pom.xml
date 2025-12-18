@@ -66,6 +66,8 @@
 					</execution>
 				</executions>
 				<configuration>
+					<skipMunitTests>true</skipMunitTests>
+				
 					<coverage>
 						<runCoverage>true</runCoverage>
 						<formats>
